@@ -1,0 +1,28 @@
+# The plugin's tests on every change; `dist/` must come out of `src/`; and nothing copyleft inside.
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - run: git diff --exit-code dist/
+      - run: npm test
+      - name: No copyleft or non-commercial licence in what ships
+        run: >
+          npx --yes license-checker@25.0.1 --production --excludePrivatePackages
+          --failOn "GPL-2.0;GPL-2.0-only;GPL-2.0-or-later;GPL-3.0;GPL-3.0-only;GPL-3.0-or-later;LGPL-2.1;LGPL-2.1-only;LGPL-2.1-or-later;LGPL-3.0;LGPL-3.0-only;LGPL-3.0-or-later;AGPL-3.0;AGPL-3.0-only;AGPL-3.0-or-later;MPL-2.0;EUPL-1.2;CC-BY-NC-4.0;CC-BY-NC-SA-4.0;SSPL-1.0"
