@@ -29,6 +29,9 @@ export class PackagedData {
   async fetch({ kind, filename }) {
     if (kind !== "standardFontDataUrl") throw new Error(`${kind} is not packaged`);
     const name = String(filename).replace(/[^A-Za-z0-9_-]/g, "");
+    // Liberation Sans is GPL with a font exception, so it stays out of an MIT package (unlike the
+    // viewer). pdf.js then writes Helvetica with the phone's sans-serif.
+    if (name.startsWith("Liberation")) throw new Error(`${filename} is not packaged`);
     // The path is built at run time on purpose: the bundler must leave the import alone.
     const path = `./fonts/${name}.js`;
     const font = await import(path);

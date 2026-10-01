@@ -42,6 +42,9 @@ describe("the document", () => {
   it("serves the standard fonts from the package, never from a URL", async () => {
     const data = new PackagedData();
     await expect(data.fetch({ kind: "cMapUrl", filename: "x" })).rejects.toThrow(/not packaged/);
+    // Liberation Sans is GPL (with a font exception): it is not in the package, and pdf.js is not
+    // even sent to look for it; Helvetica falls back to the phone's sans-serif.
+    await expect(data.fetch({ kind: "standardFontDataUrl", filename: "LiberationSans-Regular.ttf" })).rejects.toThrow(/not packaged/);
     expect(fromBase64("AQID")).toEqual(new Uint8Array([1, 2, 3]));
   });
 });
