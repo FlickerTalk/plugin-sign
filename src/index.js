@@ -450,6 +450,11 @@ class Sign extends HTMLElement {
         .map((line, at) => `<div class="line" style="top:${((layout.lines[at] - layout.size) / height) * 100}%;font-size:${layout.size * perPoint}px">${escape(line)}</div>`)
         .join("")}
       <span class="handle" data-act="resize" aria-label="${escape(this.T("resize"))}"></span>`;
+    // A line wider than the box is written smaller in the PDF (`stamp`); the preview does the same.
+    for (const line of element.querySelectorAll(".line")) {
+      const { scrollWidth, clientWidth } = line;
+      if (clientWidth > 0 && scrollWidth > clientWidth) line.style.fontSize = `${(parseFloat(line.style.fontSize) * clientWidth) / scrollWidth}px`;
+    }
     element.addEventListener("pointerdown", (event) => this.onBoxDown(event));
     element.addEventListener("pointermove", (event) => this.onBoxMove(event));
     element.addEventListener("pointerup", (event) => this.onBoxUp(event));

@@ -4,7 +4,7 @@
 // `<name>-signed.pdf` to the chat (📤) or to the phone (💾). The other person signs the file that
 // arrives and both signatures stay. Nothing is kept: no store, no records.
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import { placeBox } from "../src/geometry.js";
+import { placeBox, stampLayout } from "../src/geometry.js";
 import { fromBase64 } from "../src/render.js";
 import { fixture, inside, png, shown } from "./helpers.js";
 import "../src/index.js";
@@ -261,6 +261,32 @@ describe("signing", () => {
     expect($(".box")).toBeNull();
     expect(act("send")).toBeNull();
     expect($("[data-hint]")).not.toBeNull();
+  });
+});
+
+describe("the signature as shown", () => {
+  it("shrinks a line of text that does not fit the box, as the PDF will", async () => {
+    // happy-dom lays nothing out: the lines say they are twice as wide as the box.
+    const scroll = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollWidth");
+    const client = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", { configurable: true, get() { return this.classList?.contains("line") ? 200 : 0; } });
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", { configurable: true, get() { return this.classList?.contains("line") ? 100 : 0; } });
+    try {
+      await mount({ file: pdfFile("two-pages.pdf", fixture("two-pages.pdf")) });
+      await signAt(0, 0.5, 0.5);
+      const line = $(".box .line");
+      const sheet = $$(".sheet")[0];
+      const size = parseFloat(line.style.fontSize);
+      const box = placeBox(0.5, 0.5, { width: 300, height: 400 });
+      const full = (parseFloat(sheet.style.width) / 300) * stampLayout(box.w * 300, box.h * 400, 1).size;
+      expect(size).toBeCloseTo(full / 2, 5);
+    } finally {
+      // happy-dom keeps them further up the prototype chain: put back what was here, if anything.
+      for (const [key, was] of [["scrollWidth", scroll], ["clientWidth", client]]) {
+        if (was) Object.defineProperty(HTMLElement.prototype, key, was);
+        else delete HTMLElement.prototype[key];
+      }
+    }
   });
 });
 
