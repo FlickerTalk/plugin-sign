@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { openDocument } from "../src/render.js";
-import { displayedSize, fractionAt, moveBox, normalizeRotation, placeBox, pointInBox, resizeBox, stampLayout, toPdfPoint } from "../src/geometry.js";
+import { displayedSize, fractionAt, moveBox, normalizeRotation, placeBox, pointInBox, resizeBox, stampLayout, strokeBounds, toPdfPoint } from "../src/geometry.js";
 
 const VIEW = [50, 100, 350, 500];
 
@@ -118,5 +118,21 @@ describe("the signature's box", () => {
     expect(pointInBox(box, 0, 0, VIEW, 90)).toEqual(toPdfPoint(0.25, 0.5, VIEW, 90));
     const [x, y] = pointInBox(box, size.width * 0.5, size.height * 0.25, VIEW, 90);
     expect([x, y]).toEqual(toPdfPoint(0.75, 0.75, VIEW, 90));
+  });
+});
+
+describe("what is kept of the pad", () => {
+  it("is only the ink, with a margin for the pen's width, inside the pad", () => {
+    const strokes = [
+      { maxWidth: 2.5, points: [{ x: 40, y: 30 }, { x: 120, y: 60 }] },
+      { maxWidth: 2.5, points: [{ x: 90, y: 20 }] },
+    ];
+    expect(strokeBounds(strokes, 4, { width: 320, height: 140 })).toEqual({ x: 36, y: 16, width: 88, height: 48 });
+    expect(strokeBounds([{ points: [{ x: 2, y: 3 }, { x: 318, y: 139 }] }], 4, { width: 320, height: 140 })).toEqual({ x: 0, y: 0, width: 320, height: 140 });
+  });
+
+  it("is nothing when nothing was drawn", () => {
+    expect(strokeBounds([], 4, { width: 320, height: 140 })).toBeNull();
+    expect(strokeBounds([{ points: [] }], 4, { width: 320, height: 140 })).toBeNull();
   });
 });

@@ -94,3 +94,15 @@ export function pointInBox(box, x, y, view, rotate) {
   const size = displayedSize(view, rotate);
   return toPdfPoint(box.u + x / size.width, box.v + y / size.height, view, rotate);
 }
+
+/** The part of the pad that holds ink: the strokes' points (signature_pad's `toData()`), a
+ *  `margin` around them for the pen's width, in whole pixels, inside `limits`; or nothing. */
+export function strokeBounds(strokes, margin, limits) {
+  const points = strokes.flatMap((stroke) => stroke.points ?? []);
+  if (points.length === 0) return null;
+  const left = Math.max(0, Math.floor(Math.min(...points.map((point) => point.x)) - margin));
+  const top = Math.max(0, Math.floor(Math.min(...points.map((point) => point.y)) - margin));
+  const right = Math.min(limits.width, Math.ceil(Math.max(...points.map((point) => point.x)) + margin));
+  const bottom = Math.min(limits.height, Math.ceil(Math.max(...points.map((point) => point.y)) + margin));
+  return { x: left, y: top, width: Math.max(1, right - left), height: Math.max(1, bottom - top) };
+}
