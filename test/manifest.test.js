@@ -18,6 +18,7 @@ it("says what the plan asks and nothing more", () => {
     permissions: { send: "propose" },
     opens: ["application/pdf"],
     summary: expect.any(String),
+    locales: expect.any(Object),
   });
   expect(manifest.views).toBeUndefined();
 });
@@ -34,6 +35,24 @@ it("keeps to the schema of plugin-sdk", () => {
   // In English, and honest: a drawn signature, never a promise of legal validity.
   expect(manifest.summary).toMatch(/drawn/i);
   expect(manifest.summary).not.toMatch(/legal|certif/i);
+});
+
+// The 20 languages of the app besides English, in which the catalogue shows the plugin's name and
+// summary (plugin-sdk, `locales` in module.schema.json). Sign has no title of its own to match.
+const LOCALES = ["es", "pt", "fr", "de", "it", "ro", "ru", "uk", "pl", "tr", "ar", "hi", "bn", "id", "vi", "th", "ja", "ko", "zh-CN", "zh-TW"];
+const codePoints = (text) => [...text].length;
+
+it("names and sums up the plugin in the 20 other languages of the app, within the SDK's limits", () => {
+  expect(Object.keys(manifest.locales ?? {})).toEqual(LOCALES);
+  for (const lang of LOCALES) {
+    const { name, summary } = manifest.locales[lang];
+    expect(summary, lang).toBeTypeOf("string");
+    expect(codePoints(summary.trim()), lang).toBeGreaterThan(0);
+    expect(codePoints(summary), lang).toBeLessThanOrEqual(200);
+    expect(name, lang).toBeTypeOf("string");
+    expect(codePoints(name.trim()), lang).toBeGreaterThan(0);
+    expect(codePoints(name), lang).toBeLessThanOrEqual(64);
+  }
 });
 
 it("pins every dependency to one version", () => {
