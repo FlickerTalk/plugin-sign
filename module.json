@@ -2,7 +2,7 @@
   "id": "com.flickertalk.sign",
   "name": "Sign",
   "version": "1.0.0",
-  "minCoreVersion": "1.1.0",
+  "minCoreVersion": "1.3.0",
   "components": [
     "ft-sign"
   ],

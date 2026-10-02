@@ -1,5 +1,5 @@
 // The manifest (plugin plan §6, plugin-sdk `module.schema.json`, checked here by hand since no
-// plugin pulls the schema in): the id and name, core 1.1.0, only `send: propose`, opens PDFs and
+// plugin pulls the schema in): the id and name, core 1.3.0 (the only core it was tried on), only `send: propose`, opens PDFs and
 // is not their viewer (a tap on a PDF still opens the viewer).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -13,7 +13,7 @@ it("says what the plan asks and nothing more", () => {
     id: "com.flickertalk.sign",
     name: "Sign",
     version: pkg.version,
-    minCoreVersion: "1.1.0",
+    minCoreVersion: "1.3.0",
     components: ["ft-sign"],
     permissions: { send: "propose" },
     opens: ["application/pdf"],
