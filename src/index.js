@@ -93,7 +93,7 @@ class Sign extends HTMLElement {
   constructor() {
     super();
     this.root = this.attachShadow({ mode: "open" });
-    this.lang = "en";
+    this.language = "en";
     this.state = "start";
     this.bytes = null;
     this.fileName = "";
@@ -126,15 +126,15 @@ class Sign extends HTMLElement {
   }
 
   get dir() {
-    return directionOf(this.lang);
+    return directionOf(this.language);
   }
 
   T(key, values) {
-    return t(this.lang, key, values);
+    return t(this.language, key, values);
   }
 
   async onOpen(opening) {
-    this.lang = opening.lang || "en";
+    this.language = opening.lang || "en";
     if (opening.dark) this.setAttribute("dark", "");
     if (opening.file?.data) await this.load(opening.file);
     else this.paint();
@@ -247,7 +247,7 @@ class Sign extends HTMLElement {
       this.view.innerHTML = `<div class="bar"><span class="grow"></span>${close}</div>${states[this.state] ?? states.start}`;
       return;
     }
-    const number = new Intl.NumberFormat(this.lang);
+    const number = new Intl.NumberFormat(this.language);
     this.view.innerHTML = `
       <div class="bar">
         <button data-act="zoom-out" aria-label="${escape(this.T("zoomOut"))}">${icon("remove-outline")}</button>
@@ -482,7 +482,7 @@ class Sign extends HTMLElement {
 
   /** The text under the signature: the name if there is one, then the phone's date and time. */
   lineTexts(when) {
-    const date = this.T("clock", { date: formatWhen(when, this.lang) });
+    const date = this.T("clock", { date: formatWhen(when, this.language) });
     return [this.name.trim(), date].filter(Boolean);
   }
 
