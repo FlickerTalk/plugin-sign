@@ -1,0 +1,22 @@
+{
+  "name": "@flickertalk/plugin-sign",
+  "private": true,
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "test": "vitest run",
+    "fixtures": "node test/fixtures/make.mjs"
+  },
+  "dependencies": {
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "6.3.289",
+    "signature_pad": "5.1.4"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "happy-dom": "20.14.5",
+    "vitest": "5.0.2"
+  }
+}

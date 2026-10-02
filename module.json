@@ -1,0 +1,16 @@
+{
+  "id": "com.flickertalk.sign",
+  "name": "Sign",
+  "version": "1.0.0",
+  "minCoreVersion": "1.1.0",
+  "components": [
+    "ft-sign"
+  ],
+  "permissions": {
+    "send": "propose"
+  },
+  "opens": [
+    "application/pdf"
+  ],
+  "summary": "Both of you sign the same PDF with a finger, in turns, through the chat: a drawn signature with the phone's date and time."
+}
