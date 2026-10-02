@@ -52,6 +52,8 @@ let element;
 const $ = (selector) => element.shadowRoot.querySelector(selector);
 const $$ = (selector) => [...element.shadowRoot.querySelectorAll(selector)];
 const act = (name) => $(`[data-act="${name}"]`);
+/** The icons an element shows, by name: the app's (`./icon/<name>.svg`) and the plugin's own. */
+const iconsIn = (node) => [...node.querySelectorAll("[data-icon]")].map((one) => one.dataset.icon);
 
 async function mount(opening, options) {
   core = fakeCore(options);
@@ -94,6 +96,16 @@ async function signAt(index, u, v) {
   await settle();
 }
 
+describe("creating the element", () => {
+  // A custom element's constructor may not leave attributes or children: a real browser throws
+  // NotSupportedError on document.createElement otherwise. `lang` is a reflected attribute.
+  it("leaves no attribute and no child when created", () => {
+    const created = document.createElement("ft-sign");
+    expect([...created.attributes].map((one) => one.name)).toEqual([]);
+    expect(created.childNodes).toHaveLength(0);
+  });
+});
+
 describe("opening", () => {
   it("shows the pages of the PDF it was opened with and says where to tap, in the app's language", async () => {
     await mount({ lang: "es", file: pdfFile("contrato.pdf", fixture("two-pages.pdf")) });
@@ -124,14 +136,14 @@ describe("opening", () => {
   it("warns that a digital signature will stop being valid, and still lets you sign", async () => {
     await mount({ file: pdfFile("agreement.pdf", fixture("signed.pdf")) });
     const warning = $("[role=alert]");
-    expect(warning.textContent).toContain("⚠️");
+    expect(iconsIn(warning)).toEqual(["warning-outline"]);
     expect(warning.textContent).toContain("no longer be valid");
     expect($$(".sheet")).toHaveLength(1);
   });
 
   it("says a PDF is locked or broken, and offers another", async () => {
     await mount({ file: pdfFile("secret.pdf", fixture("locked.pdf")) });
-    expect($("[role=alert]").textContent).toContain("🔒");
+    expect(iconsIn($("[role=alert]"))).toEqual(["lock-closed-outline"]);
     expect($("[role=alert]").textContent).toContain("password protected");
     expect(act("pick")).not.toBeNull();
     expect($$(".sheet")).toHaveLength(0);
@@ -337,5 +349,82 @@ describe("fingers", () => {
     expect($("[data-pad]")).toBeNull();
     expect($$(".sheet")[1].querySelector(".box")).not.toBeNull();
     expect($$(".sheet")[0].querySelector(".box")).toBeNull();
+  });
+});
+
+describe("icons, not emoji (Ionicons, as in the app)", () => {
+  const PICTOGRAPH = /\p{Extended_Pictographic}/u;
+  /** Everything a screen paints, text and attributes, without its style sheet. */
+  const painted = () => element.shadowRoot.innerHTML.replace(/<style>[\s\S]*?<\/style>/, "");
+  const screens = [];
+  const look = (name) => {
+    screens.push(name);
+    expect(painted(), name).not.toMatch(PICTOGRAPH);
+    for (const button of $$("button")) expect(button.getAttribute("aria-label"), `${name}: a button`).toBeTruthy();
+    for (const one of $$("[data-icon]")) {
+      // An icon beside a text is hidden from a screen reader; the button carries the name.
+      expect(one.getAttribute("aria-hidden"), `${name}: ${one.dataset.icon}`).toBe("true");
+    }
+  };
+
+  it("paints no emoji on any screen, in any language", async () => {
+    for (const lang of ["en", "es", "ar", "ja"]) {
+      await mount({ lang, file: null });
+      look(`${lang} start`);
+      await mount({ lang, file: pdfFile("x.pdf", fixture("locked.pdf")) });
+      look(`${lang} locked`);
+      await mount({ lang, file: pdfFile("x.pdf", fixture("broken.pdf")) });
+      look(`${lang} broken`);
+      await mount({ lang, file: pdfFile("a.pdf", fixture("signed.pdf")) });
+      look(`${lang} sealed, ready`);
+      const sheet = $$(".sheet")[0];
+      sheet.getBoundingClientRect = at(0, 0, 300, 400);
+      tap(sheet, 150, 200);
+      look(`${lang} pad`);
+      draw();
+      act("done").click();
+      await settle();
+      look(`${lang} signed`);
+      act("save").click();
+      await settle();
+      look(`${lang} saved`);
+    }
+    await mount({ file: pdfFile("two-pages.pdf", fixture("two-pages.pdf")) }, { saved: false });
+    await signAt(0, 0.5, 0.5);
+    act("save").click();
+    await settle();
+    look("save failed");
+    expect(screens.length).toBeGreaterThan(20);
+  });
+
+  it("shows the state, the warnings and the hint with an icon beside the text", async () => {
+    await mount({ file: null });
+    expect(iconsIn($(".state"))).toEqual(["pencil-outline", "document-text-outline"]);
+    await mount({ file: pdfFile("x.pdf", fixture("broken.pdf")) });
+    expect(iconsIn($("[role=alert]"))).toEqual(["warning-outline"]);
+    await mount({ file: pdfFile("two-pages.pdf", fixture("two-pages.pdf")) });
+    expect(iconsIn($("[data-hint]"))).toEqual(["hand-left-outline"]);
+    const sheet = $$(".sheet")[0];
+    sheet.getBoundingClientRect = at(0, 0, 300, 400);
+    tap(sheet, 150, 200);
+    expect(iconsIn($("[data-pad] .title"))).toEqual(["pencil-outline"]);
+    draw();
+    act("done").click();
+    await settle();
+    expect(iconsIn($("[data-name]").parentElement)).toContain("person-outline");
+    expect($("[data-name]").getAttribute("placeholder")).toBe("Name (optional)");
+    act("save").click();
+    await settle();
+    expect(iconsIn($("[role=status]"))).toEqual(["checkmark-outline"]);
+    expect($("[role=status]").textContent.trim()).toBe("Saved");
+  });
+
+  it("goes dark by the attribute the app's colours set, never by :host-context (WebKit has none)", async () => {
+    await mount({ dark: true, file: null });
+    expect(element.hasAttribute("dark")).toBe(true);
+    expect(element.shadowRoot.querySelector("style").textContent).not.toContain(":host-context");
+    expect(element.shadowRoot.querySelector("style").textContent).toContain(":host([dark])");
+    await mount({ dark: false, file: null });
+    expect(element.hasAttribute("dark")).toBe(false);
   });
 });

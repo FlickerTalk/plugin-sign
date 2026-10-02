@@ -1,12 +1,13 @@
 // Sign, for FlickerTalk (plugin plan §6): both people sign the same PDF with a finger, in turns,
-// through the chat. Open a PDF ("Open with", or 🧰 → 📄), tap where the signature goes, sign on
+// through the chat. Open a PDF ("Open with", or the toolbox and the document button), tap where the signature goes, sign on
 // the pad, move or resize it, add a name if you like, and hand `<name>-signed.pdf` to the chat
-// (📤) or to the phone (💾). The other person does the same on the file that arrives, and both
+// (send) or to the phone (save). The other person does the same on the file that arrives, and both
 // signatures stay. It is a drawn signature with the phone's date and time, not a digital one.
 // Nothing is kept: no store, no records; the signature lives only while the plugin is open.
 import SignaturePad from "signature_pad";
 import { fractionAt, moveBox, placeBox, resizeBox, stampLayout, strokeBounds } from "./geometry.js";
 import { directionOf, formatWhen, t } from "./i18n.js";
+import { icon } from "./icons.js";
 import { failureOf, fitScale, fromBase64, nearPages, openDocument, ratioFor } from "./render.js";
 import { inspect, signedName, stamp, toBase64 } from "./stamp.js";
 
@@ -23,8 +24,6 @@ const PDF = "application/pdf";
 const escape = (text) =>
   String(text).replace(/[&<>"']/g, (one) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[one]);
 
-const icon = (name) => `<i class="i" aria-hidden="true" style="--i:url(./icon/${name}.svg)"></i>`;
-
 const LIGHT = "--paper: #e9e9e9; --bar: rgba(255,255,255,.94); --text: #111; --soft: #666; --card: #fff; --line: #d0d0d0; --warn: #fff4d6;";
 const DARK = "--paper: #1c1c1e; --bar: rgba(28,28,30,.94); --text: #f4f4f4; --soft: #aaa; --card: #2c2c2e; --line: #444; --warn: #4a3b12;";
 
@@ -32,7 +31,6 @@ const STYLE = `
 :host { display: flex; flex-direction: column; font: 14px system-ui, sans-serif; ${LIGHT} --accent: #3478f6; color: var(--text); }
 @media (prefers-color-scheme: dark) { :host { ${DARK} } }
 :host([dark]) { ${DARK} }
-:host-context([data-dark]) { ${DARK} }
 * { box-sizing: border-box; }
 .view { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .bar { display: flex; gap: 4px; align-items: center; padding: 4px 6px; background: var(--bar); }
@@ -43,11 +41,14 @@ button.primary { background: var(--accent); color: #fff; }
 button.wide { display: inline-flex; gap: 8px; align-items: center; padding: 0 16px; background: var(--accent); color: #fff; }
 .i { display: block; width: 22px; height: 22px; margin: auto; background: currentColor; -webkit-mask: var(--i) center/contain no-repeat; mask: var(--i) center/contain no-repeat; }
 button.wide .i { margin: 0; }
+.i.own { background: none; -webkit-mask: none; mask: none; }
+.i.own svg { display: block; width: 100%; height: 100%; }
 input { flex: 1; min-width: 0; height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; background: var(--card); color: inherit; font: inherit; }
-.note { margin: 0; padding: 6px 12px; font-size: 13px; }
+.note { display: flex; gap: 8px; align-items: center; margin: 0; padding: 6px 12px; font-size: 13px; }
+.note .i { flex: none; width: 18px; height: 18px; margin: 0; }
 .note:empty { display: none; }
 .warn { background: var(--warn); }
-.hint { color: var(--soft); text-align: center; }
+.hint { color: var(--soft); justify-content: center; }
 .pages { flex: 1; overflow: auto; background: var(--paper); touch-action: pan-x pan-y; }
 .sheet { position: relative; margin: 8px auto; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
 .sheet canvas { display: block; width: 100%; height: 100%; }
@@ -56,10 +57,11 @@ input { flex: 1; min-width: 0; height: 40px; border: 1px solid var(--line); bord
 .box .line { position: absolute; left: 0; right: 0; white-space: nowrap; overflow: hidden; line-height: 1; font-family: Helvetica, Arial, sans-serif; text-align: start; pointer-events: none; }
 .handle { position: absolute; right: -14px; bottom: -14px; width: 28px; height: 28px; border-radius: 14px; background: var(--accent); touch-action: none; cursor: nwse-resize; }
 .state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; padding: 40px 16px; text-align: center; }
-.big { font-size: 44px; line-height: 1; }
+.big .i { width: 56px; height: 56px; }
 .pad { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(0,0,0,.45); touch-action: none; }
 .card { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; background: var(--card); }
-.card .title { margin: 0; font-weight: 600; }
+.card .title { display: flex; gap: 8px; align-items: center; margin: 0; font-weight: 600; }
+.card .title .i { margin: 0; }
 .card canvas { display: block; width: 100%; aspect-ratio: 2.4 / 1; background: #fff; border: 1px solid var(--line); border-radius: 10px; touch-action: none; }
 .small { margin: 0; font-size: 12px; color: var(--soft); }
 .row { display: flex; gap: 4px; align-items: center; }
@@ -91,7 +93,7 @@ class Sign extends HTMLElement {
   constructor() {
     super();
     this.root = this.attachShadow({ mode: "open" });
-    this.lang = "en";
+    this.language = "en";
     this.state = "start";
     this.bytes = null;
     this.fileName = "";
@@ -110,7 +112,7 @@ class Sign extends HTMLElement {
     this.padOpen = false;
     this.pad = null;
     this.busy = false;
-    this.message = "";
+    this.message = null;
   }
 
   connectedCallback() {
@@ -124,15 +126,15 @@ class Sign extends HTMLElement {
   }
 
   get dir() {
-    return directionOf(this.lang);
+    return directionOf(this.language);
   }
 
   T(key, values) {
-    return t(this.lang, key, values);
+    return t(this.language, key, values);
   }
 
   async onOpen(opening) {
-    this.lang = opening.lang || "en";
+    this.language = opening.lang || "en";
     if (opening.dark) this.setAttribute("dark", "");
     if (opening.file?.data) await this.load(opening.file);
     else this.paint();
@@ -143,7 +145,7 @@ class Sign extends HTMLElement {
     this.state = "loading";
     this.signature = null;
     this.box = null;
-    this.message = "";
+    this.message = null;
     this.paint();
     this.fileName = file.name || "";
     this.bytes = fromBase64(file.data || "");
@@ -215,10 +217,17 @@ class Sign extends HTMLElement {
     this.paintBox();
   }
 
-  say(text) {
-    this.message = text;
+  /** A word in the status line, with the icon that goes beside it, if any. */
+  say(text, name) {
+    this.message = { text, icon: name };
     const status = this.view.querySelector("[data-status]");
-    if (status) status.textContent = text;
+    if (status) status.innerHTML = this.statusMarkup();
+  }
+
+  statusMarkup() {
+    const { text = "", icon: name } = this.message || {};
+    if (!text) return "";
+    return `${name ? icon(name) : ""}<span>${escape(text)}</span>`;
   }
 
   // ---- What the plugin shows ----
@@ -230,15 +239,15 @@ class Sign extends HTMLElement {
     this.painted.clear();
     if (this.state !== "ready") {
       const states = {
-        start: `<div class="state"><span class="big" aria-hidden="true">✍️</span><p>${escape(this.T("intro"))}</p>${pick}</div>`,
-        loading: `<div class="state" role="status"><span class="big" aria-hidden="true">📄</span><p>${escape(this.T("loading"))}</p></div>`,
-        locked: `<div class="state"><div role="alert"><span class="big">🔒</span><p>${escape(this.T("locked"))}</p></div>${pick}</div>`,
-        broken: `<div class="state"><div role="alert"><span class="big">⚠️</span><p>${escape(this.T("broken"))}</p></div>${pick}</div>`,
+        start: `<div class="state"><span class="big">${icon("pencil-outline")}</span><p>${escape(this.T("intro"))}</p>${pick}</div>`,
+        loading: `<div class="state" role="status"><span class="big">${icon("document-text-outline")}</span><p>${escape(this.T("loading"))}</p></div>`,
+        locked: `<div class="state"><div role="alert"><span class="big">${icon("lock-closed-outline")}</span><p>${escape(this.T("locked"))}</p></div>${pick}</div>`,
+        broken: `<div class="state"><div role="alert"><span class="big">${icon("warning-outline")}</span><p>${escape(this.T("broken"))}</p></div>${pick}</div>`,
       };
       this.view.innerHTML = `<div class="bar"><span class="grow"></span>${close}</div>${states[this.state] ?? states.start}`;
       return;
     }
-    const number = new Intl.NumberFormat(this.lang);
+    const number = new Intl.NumberFormat(this.language);
     this.view.innerHTML = `
       <div class="bar">
         <button data-act="zoom-out" aria-label="${escape(this.T("zoomOut"))}">${icon("remove-outline")}</button>
@@ -267,13 +276,14 @@ class Sign extends HTMLElement {
     const notes = this.view.querySelector("[data-notes]");
     if (!notes) return;
     notes.innerHTML = `
-      ${this.sealed ? `<p class="note warn" role="alert">⚠️ ${escape(this.T("sealed"))}</p>` : ""}
-      ${this.signature ? "" : `<p class="note hint" data-hint>👆 ${escape(this.T("tap"))}</p>`}
-      <p class="note" role="status" data-status>${escape(this.message)}</p>`;
+      ${this.sealed ? `<p class="note warn" role="alert">${icon("warning-outline")}<span>${escape(this.T("sealed"))}</span></p>` : ""}
+      ${this.signature ? "" : `<p class="note hint" data-hint>${icon("hand-left-outline")}<span>${escape(this.T("tap"))}</span></p>`}
+      <p class="note" role="status" data-status>${this.statusMarkup()}</p>`;
     const bottom = this.view.querySelector("[data-bottom]");
     bottom.innerHTML = this.signature
       ? `<div class="bar">
-          <input data-name type="text" maxlength="80" autocomplete="off" placeholder="👤 ${escape(this.T("name"))}" aria-label="${escape(this.T("name"))}" value="${escape(this.name)}">
+          ${icon("person-outline")}
+          <input data-name type="text" maxlength="80" autocomplete="off" placeholder="${escape(this.T("name"))}" aria-label="${escape(this.T("name"))}" value="${escape(this.name)}">
           <button data-act="again" aria-label="${escape(this.T("again"))}">${icon("pencil-outline")}</button>
           <button data-act="remove" aria-label="${escape(this.T("remove"))}">${icon("trash-outline")}</button>
           <button data-act="save" aria-label="${escape(this.T("save"))}">${icon("save-outline")}</button>
@@ -472,7 +482,7 @@ class Sign extends HTMLElement {
 
   /** The text under the signature: the name if there is one, then the phone's date and time. */
   lineTexts(when) {
-    const date = this.T("clock", { date: formatWhen(when, this.lang) });
+    const date = this.T("clock", { date: formatWhen(when, this.language) });
     return [this.name.trim(), date].filter(Boolean);
   }
 
@@ -520,7 +530,7 @@ class Sign extends HTMLElement {
     host.innerHTML = `
       <div class="pad" data-pad role="dialog" aria-label="${escape(this.T("padTitle"))}">
         <div class="card">
-          <p class="title">✍️ ${escape(this.T("padTitle"))}</p>
+          <p class="title">${icon("pencil-outline")}<span>${escape(this.T("padTitle"))}</span></p>
           <canvas aria-label="${escape(this.T("padTitle"))}"></canvas>
           <p class="small">${escape(this.T("drawn"))}</p>
           <div class="row">
@@ -547,7 +557,7 @@ class Sign extends HTMLElement {
     }
   }
 
-  /** ✅ only once there is something on the pad. */
+  /** Done only once there is something on the pad. */
   padChanged() {
     const done = this.view.querySelector('[data-act="done"]');
     if (done) done.disabled = !this.pad || this.pad.isEmpty();
@@ -607,11 +617,11 @@ class Sign extends HTMLElement {
         globalThis.ft.send(name, PDF, data);
       } else {
         const saved = await globalThis.ft.save(name, PDF, data);
-        this.say(saved ? `✅ ${this.T("saved")}` : `⚠️ ${this.T("saveFailed")}`);
+        this.say(saved ? this.T("saved") : this.T("saveFailed"), saved ? "checkmark-outline" : "warning-outline");
       }
     } catch (error) {
       console.warn("signing failed", error);
-      this.say(`⚠️ ${this.T("failed")}`);
+      this.say(this.T("failed"), "warning-outline");
     } finally {
       this.busy = false;
     }
