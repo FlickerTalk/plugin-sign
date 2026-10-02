@@ -77,7 +77,8 @@ npm run fixtures         # remakes the test PDFs
 
 `dist/` is generated and **committed**: what the catalogue signs is `module.json` + `dist/`, and
 CI checks that it comes out of `src/`. A test keeps `dist/` under 5 MB (it is about 2.5 MB, about
-0.95 MB zipped). It needs FlickerTalk **1.1.0** (`minCoreVersion`): "Open with" and `lang`.
+0.95 MB zipped). Needs FlickerTalk core **1.3.0** (`minCoreVersion`): the only core it has been tried on, and
+apps before it always say `dark: false`, so Sign would paint dark text on a dark app.
 
 ## Licences
 

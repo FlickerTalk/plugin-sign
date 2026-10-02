@@ -8,8 +8,10 @@ import { APP_ICONS, OWN_ICONS, icon } from "../src/icons.js";
 
 const ROOT = join(import.meta.dirname, "..");
 
-// The icons the app lends its plugins: `ICONS` in app `src-tauri/src/plugins.rs`, as of
-// `origin/games-section` c3df572 (2026-10-02).
+// The icons the app lends its plugins in core 1.3.0, the `minCoreVersion` this plugin declares:
+// `src-tauri/resources/icons/` (the files behind `ICONS` in `src-tauri/src/plugins.rs`) in app
+// `origin/main` 8fbc3cf, whose `CORE_VERSION` is 1.3.0 (2026-10-02).
+const LENT_BY_CORE = "1.3.0";
 const LENT = [
   "add-outline", "alarm-outline", "arrow-back-outline", "arrow-redo-outline", "arrow-undo-outline", "arrow-up-outline", "brush-outline",
   "calculator-outline", "chatbubble-outline", "checkmark-outline", "close-outline", "cloud-done-outline", "cloud-outline",
@@ -21,6 +23,11 @@ const LENT = [
 ];
 
 describe("the icons", () => {
+  it("are checked against the icons of the core the manifest asks for", () => {
+    const manifest = JSON.parse(readFileSync(join(ROOT, "module.json"), "utf8"));
+    expect(manifest.minCoreVersion).toBe(LENT_BY_CORE);
+  });
+
   it("asks the app only for icons it lends", () => {
     for (const name of APP_ICONS) expect(LENT, name).toContain(name);
     const asked = [...readFileSync(join(ROOT, "src", "index.js"), "utf8").matchAll(/icon\("([a-z-]+)"/g)].map((match) => match[1]);
