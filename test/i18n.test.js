@@ -36,6 +36,12 @@ describe("the catalogue", () => {
     expect(t("es", "clock", { date: "2 oct" })).toBe("2 oct (reloj del teléfono)");
   });
 
+  it("carries no emoji: the view paints the icons beside the text", () => {
+    for (const lang of LANGUAGES) {
+      for (const [key, text] of Object.entries(catalogueOf(lang))) expect(text, `${lang}.${key}`).not.toMatch(/\p{Extended_Pictographic}/u);
+    }
+  });
+
   it("never promises a legal or a certified signature", () => {
     expect(t("en", "drawn")).toBe("A drawn signature, not a digital signature with a certificate.");
     for (const lang of LANGUAGES) expect(catalogueOf(lang).drawn.toLowerCase(), lang).not.toMatch(/legal/);
