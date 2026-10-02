@@ -13,6 +13,7 @@ Sign (`plugin-sign`) is MIT licensed. Its bundle (`dist/index.js`) and its fonts
 | pako | 1.0.11 | MIT and Zlib |
 | tslib | 1.14.1 | 0BSD |
 | signature_pad | 5.1.4 | MIT |
+| Ionicons (two icons: person-outline, warning-outline) | 8.1.0 | MIT |
 
 ## pdf.js (pdfjs-dist) 6.3.289 — Apache-2.0
 
@@ -434,4 +435,32 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
+
+## Ionicons 8.1.0 — MIT
+
+Ionic. The two icons the app does not lend (person-outline, warning-outline), inline in the bundle as the package ships them.
+
+```text
+The MIT License (MIT)
+
+Copyright (c) 2015-present Ionic (http://ionic.io/)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 ```

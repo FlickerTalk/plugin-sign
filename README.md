@@ -20,7 +20,8 @@ opens that file, signs it too and sends it back. The result is one PDF with both
 - 📤 puts `<name>-signed.pdf` in the message box (the app closes the plugin; the user sends it).
   💾 saves it on the phone. A file already called `…-signed.pdf` keeps its name.
 - Pinch or ➕/➖ to zoom. A swipe scrolls; it is never taken for a tap. Arabic runs right to left;
-  dark mode follows the phone.
+  dark mode follows the app. Every icon is an Ionicon, as in the app: the ones the app lends
+  (`./icon/<name>.svg`), and two of its own (`src/icons.js`); no emoji in the interface.
 
 What it says before signing:
 
@@ -82,4 +83,4 @@ CI checks that it comes out of `src/`. A test keeps `dist/` under 5 MB (it is ab
 
 MIT. What is inside, with each licence in full: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 (pdf.js, Apache-2.0; core-js, MIT; PDFium fonts, BSD-3-Clause; pdf-lib, @pdf-lib/standard-fonts,
-@pdf-lib/upng, signature_pad, MIT; pako, MIT and Zlib; tslib, 0BSD).
+@pdf-lib/upng, signature_pad, MIT; two Ionicons the app does not lend, MIT; pako, MIT and Zlib; tslib, 0BSD).

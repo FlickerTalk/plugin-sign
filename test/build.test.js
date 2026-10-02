@@ -35,9 +35,9 @@ const ALLOWED_HTTP = [
   /^http:\/\/example\.com$/,
 ];
 
-/** In the notices only: the Apache License's own header, reproduced as the licence asks. A text
+/** In the notices only: the Apache License's own header and the Ionicons copyright line, reproduced as their licences ask. A text
  *  file the plugin never loads. */
-const NOTICES_HTTP = [/^http:\/\/www\.apache\.org\/licenses\/$/];
+const NOTICES_HTTP = [/^http:\/\/www\.apache\.org\/licenses\/$/, /^http:\/\/ionic\.io\/$/];
 
 describe("the package", () => {
   it("holds the bundle, the permissive standard fonts and the notices", () => {
@@ -73,7 +73,7 @@ describe("the package", () => {
   it("ships the notices of everything inside, the same as the repository's", () => {
     const notices = readFileSync(join(ROOT, "THIRD_PARTY_NOTICES.md"), "utf8");
     expect(readFileSync(join(DIST, "THIRD_PARTY_NOTICES.md"), "utf8")).toBe(notices);
-    for (const part of ["pdf.js", "Apache License", "pdf-lib", "@pdf-lib/standard-fonts", "@pdf-lib/upng", "pako", "tslib", "signature_pad", "core-js", "PDFium"]) {
+    for (const part of ["pdf.js", "Apache License", "pdf-lib", "@pdf-lib/standard-fonts", "@pdf-lib/upng", "pako", "tslib", "signature_pad", "core-js", "PDFium", "Ionicons"]) {
       expect(notices, part).toContain(part);
     }
   });
