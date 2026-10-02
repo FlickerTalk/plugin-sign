@@ -96,6 +96,16 @@ async function signAt(index, u, v) {
   await settle();
 }
 
+describe("creating the element", () => {
+  // A custom element's constructor may not leave attributes or children: a real browser throws
+  // NotSupportedError on document.createElement otherwise. `lang` is a reflected attribute.
+  it("leaves no attribute and no child when created", () => {
+    const created = document.createElement("ft-sign");
+    expect([...created.attributes].map((one) => one.name)).toEqual([]);
+    expect(created.childNodes).toHaveLength(0);
+  });
+});
+
 describe("opening", () => {
   it("shows the pages of the PDF it was opened with and says where to tap, in the app's language", async () => {
     await mount({ lang: "es", file: pdfFile("contrato.pdf", fixture("two-pages.pdf")) });
