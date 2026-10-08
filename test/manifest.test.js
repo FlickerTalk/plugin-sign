@@ -13,6 +13,7 @@ it("says what the plan asks and nothing more", () => {
     id: "com.flickertalk.sign",
     name: "Sign",
     version: pkg.version,
+    icon: "pencil-outline",
     minCoreVersion: "1.3.0",
     components: ["ft-sign"],
     permissions: { send: "propose" },

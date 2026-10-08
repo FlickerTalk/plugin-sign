@@ -1,7 +1,7 @@
 // What the catalogue signs (`module.json` + `dist/`), as `npm run build` leaves it: the bundle,
 // the standard fonts it may carry, the notices of everything inside; under 5 MB (plugin plan
 // §6); with no address in it that could be asked for; and no copyleft font.
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { fixture } from "./helpers.js";
@@ -113,5 +113,20 @@ describe("the built bundle", () => {
     await Promise.all(handlers.map((handler) => handler({ lang: "en", dark: false, file })));
     for (let at = 0; at < 40; at += 1) await new Promise((resolve) => setTimeout(resolve, 0));
     expect(element.shadowRoot.querySelectorAll(".sheet")).toHaveLength(2);
+  });
+});
+
+describe("the image of the Apps grid", () => {
+  // icon.svg beside module.json and dist/, signed with the rest: the app draws it on the tile; the
+  // Ionicon in module.json stays as the fallback (2026-10-08).
+  const image = join(import.meta.dirname, "..", "icon.svg");
+
+  it("is a square 64 × 64 SVG of at most 4 KB at the root of the package, and not inside dist/", () => {
+    expect(existsSync(image), "icon.svg").toBe(true);
+    expect(statSync(image).size).toBeLessThanOrEqual(4096);
+    const svg = readFileSync(image, "utf8");
+    expect(svg.startsWith("<svg")).toBe(true);
+    expect(svg).toContain('viewBox="0 0 64 64"');
+    expect(existsSync(join(import.meta.dirname, "..", "dist", "icon.svg"))).toBe(false);
   });
 });
