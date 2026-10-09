@@ -49,8 +49,11 @@ const pdfFile = (name, bytes) => ({ name, mime: "application/pdf", data: Buffer.
 
 let core;
 let element;
-const $ = (selector) => element.shadowRoot.querySelector(selector);
-const $$ = (selector) => [...element.shadowRoot.querySelectorAll(selector)];
+// In the page, not in a shadow root: Ionic's global styles do not cross a shadow boundary.
+const $ = (selector) => element.querySelector(selector);
+const $$ = (selector) => [...element.querySelectorAll(selector)];
+// Ionic moves a button's label to the native button inside it once it has drawn.
+const label = (one) => one?.getAttribute("aria-label") ?? one?.shadowRoot?.querySelector("button")?.getAttribute("aria-label") ?? null;
 const act = (name) => $(`[data-act="${name}"]`);
 /** The icons an element shows, by name: the app's (`./icon/<name>.svg`) and the plugin's own. */
 const iconsIn = (node) => [...node.querySelectorAll("[data-icon]")].map((one) => one.dataset.icon);
@@ -111,10 +114,9 @@ describe("opening", () => {
     await mount({ lang: "es", file: pdfFile("contrato.pdf", fixture("two-pages.pdf")) });
     expect($$(".sheet")).toHaveLength(2);
     expect($("[data-hint]").textContent).toContain("Toca donde va tu firma");
-    expect(act("close").getAttribute("aria-label")).toBe("Cerrar");
+    // The app's tool window has the way out.
+    expect(act("close")).toBeNull();
     expect($("[role=alert]")).toBeNull();
-    act("close").click();
-    expect(core.ft.close).toHaveBeenCalled();
   });
 
   it("asks for a PDF when opened from 🧰 with nothing, and opens what the user picks", async () => {
@@ -355,12 +357,12 @@ describe("fingers", () => {
 describe("icons, not emoji (Ionicons, as in the app)", () => {
   const PICTOGRAPH = /\p{Extended_Pictographic}/u;
   /** Everything a screen paints, text and attributes, without its style sheet. */
-  const painted = () => element.shadowRoot.innerHTML.replace(/<style>[\s\S]*?<\/style>/, "");
+  const painted = () => element.innerHTML.replace(/<style>[\s\S]*?<\/style>/, "");
   const screens = [];
   const look = (name) => {
     screens.push(name);
     expect(painted(), name).not.toMatch(PICTOGRAPH);
-    for (const button of $$("button")) expect(button.getAttribute("aria-label"), `${name}: a button`).toBeTruthy();
+    for (const button of $$("button, ion-button")) expect(label(button), `${name}: a button`).toBeTruthy();
     for (const one of $$("[data-icon]")) {
       // An icon beside a text is hidden from a screen reader; the button carries the name.
       expect(one.getAttribute("aria-hidden"), `${name}: ${one.dataset.icon}`).toBe("true");
@@ -422,9 +424,51 @@ describe("icons, not emoji (Ionicons, as in the app)", () => {
   it("goes dark by the attribute the app's colours set, never by :host-context (WebKit has none)", async () => {
     await mount({ dark: true, file: null });
     expect(element.hasAttribute("dark")).toBe(true);
-    expect(element.shadowRoot.querySelector("style").textContent).not.toContain(":host-context");
-    expect(element.shadowRoot.querySelector("style").textContent).toContain(":host([dark])");
+    expect(element.querySelector("style").textContent).not.toContain(":host-context");
+    expect(element.querySelector("style").textContent).toContain("ft-sign[dark]");
     await mount({ dark: false, file: null });
     expect(element.hasAttribute("dark")).toBe(false);
+  });
+});
+
+describe("with the Ionic the app lends", () => {
+  it("asks for an app that lends Ionic", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    expect(JSON.parse(readFileSync(join(import.meta.dirname, "..", "module.json"), "utf8")).minCoreVersion).toBe("1.6.0");
+  });
+
+  it("asks for a PDF in Ionic's content, with an Ionic button and no bar of its own", async () => {
+    await mount({ file: null });
+    expect(element.shadowRoot).toBe(null);
+    expect($(":scope > ion-header")).toBeNull();
+    expect($(':scope > ion-content ion-button[data-act="pick"]').textContent).toContain("Choose a PDF");
+  });
+
+  it("puts the zoom in Ionic's header, the pages in a content that does not scroll, and the signed bar in its footer", async () => {
+    await mount({ file: pdfFile("two-pages.pdf", fixture("two-pages.pdf")) });
+    for (const name of ["zoom-out", "zoom-in"]) expect(label($(`:scope > ion-header > ion-toolbar ion-button[data-act="${name}"]`)), name).toBeTruthy();
+    const content = $(":scope > ion-content");
+    expect(content.getAttribute("scroll-y")).toBe("false");
+    expect(content.querySelector("[data-pages] .sheet")).not.toBeNull();
+    expect($(":scope > ion-footer")).toBeNull();
+    await signAt(0, 0.5, 0.5);
+    const footer = $(":scope > ion-footer > ion-toolbar");
+    expect(footer.querySelector("[data-name]")).not.toBeNull();
+    for (const name of ["again", "remove", "save", "send"]) expect(label(footer.querySelector(`ion-button[data-act="${name}"]`)), name).toBeTruthy();
+    expect(footer.querySelector('ion-button[data-act="send"]').getAttribute("fill")).toBe("solid");
+    act("remove").click();
+    await settle();
+    expect($(":scope > ion-footer")).toBeNull();
+  });
+
+  it("opens the pad over the header and the footer, its buttons Ionic's", async () => {
+    await mount({ file: pdfFile("two-pages.pdf", fixture("two-pages.pdf")) });
+    const sheet = $$(".sheet")[0];
+    sheet.getBoundingClientRect = at(0, 0, 300, 400);
+    tap(sheet, 150, 200);
+    // A child of the element itself, so it covers the bars too.
+    expect($(":scope > [data-padhost] [data-pad]")).not.toBeNull();
+    for (const name of ["clear", "cancel", "done"]) expect(act(name).tagName, name).toBe("ION-BUTTON");
   });
 });

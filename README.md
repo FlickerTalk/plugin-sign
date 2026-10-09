@@ -77,8 +77,12 @@ npm run fixtures         # remakes the test PDFs
 
 `dist/` is generated and **committed**: what the catalogue signs is `module.json` + `dist/`, and
 CI checks that it comes out of `src/`. A test keeps `dist/` under 5 MB (it is about 2.5 MB, about
-0.95 MB zipped). Needs FlickerTalk core **1.3.0** (`minCoreVersion`): the only core it has been tried on, and
-apps before it always say `dark: false`, so Sign would paint dark text on a dark app.
+0.95 MB zipped). Needs FlickerTalk core **1.6.0** (`minCoreVersion`), the first that lends Ionic to
+the plugin frame: since 1.0.3 the zoom sits in Ionic's `ion-header > ion-toolbar`, the pages in an
+`ion-content` that does not scroll (the pages scroll and zoom in their own box), and the bar under
+them in an `ion-footer`, all with `ion-button`s, so it looks like the rest of FlickerTalk. The app's
+tool window has the way out, so Sign has no close button of its own. The package carries no Ionic
+(`@ionic/core` is only a devDependency, so the tests draw what the phone draws).
 
 ## Licences
 

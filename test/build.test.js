@@ -53,6 +53,13 @@ describe("the package", () => {
     expect(files().filter((path) => /Liberation/i.test(relative(DIST, path)))).toEqual([]);
   });
 
+  // Ionic is the app's, lent to the frame: a copy in the package would be a second one, and heavy.
+  it("carries no Ionic of its own", () => {
+    const code = readFileSync(join(DIST, "index.js"), "utf8");
+    expect(code).not.toMatch(/@ionic\/core|ionicframework|stencil|defineCustomElement|__registerHost/i);
+    expect(code).not.toMatch(/^\s*import\s.*from\s+["'](?!\.\/)/m);
+  });
+
   it("stays under 5 MB", () => {
     const total = files().reduce((sum, path) => sum + statSync(path).size, 0);
     expect(total).toBeGreaterThan(1_000_000);
@@ -112,7 +119,7 @@ describe("the built bundle", () => {
     const file = { name: "a.pdf", mime: "application/pdf", data: Buffer.from(fixture("two-pages.pdf")).toString("base64") };
     await Promise.all(handlers.map((handler) => handler({ lang: "en", dark: false, file })));
     for (let at = 0; at < 40; at += 1) await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(element.shadowRoot.querySelectorAll(".sheet")).toHaveLength(2);
+    expect(element.querySelectorAll(".sheet")).toHaveLength(2);
   });
 });
 
