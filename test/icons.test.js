@@ -8,10 +8,11 @@ import { APP_ICONS, OWN_ICONS, icon } from "../src/icons.js";
 
 const ROOT = join(import.meta.dirname, "..");
 
-// The icons the app lends its plugins in core 1.3.0, the `minCoreVersion` this plugin declares:
-// `src-tauri/resources/icons/` (the files behind `ICONS` in `src-tauri/src/plugins.rs`) in app
-// `origin/main` 8fbc3cf, whose `CORE_VERSION` is 1.3.0 (2026-10-02).
-const LENT_BY_CORE = "1.3.0";
+// The icons the app lends its plugins in core 1.6.0, the `minCoreVersion` this plugin declares
+// (it lends Ionic to the frame, 2026-10-09): `src-tauri/resources/icons/` (the files behind `ICONS`
+// in `src-tauri/src/plugins.rs`), the ones of 1.3.0 (app 8fbc3cf) and `camera-outline`, which Sign
+// does not use.
+const LENT_BY_CORE = "1.6.0";
 const LENT = [
   "add-outline", "alarm-outline", "arrow-back-outline", "arrow-redo-outline", "arrow-undo-outline", "arrow-up-outline", "brush-outline",
   "calculator-outline", "chatbubble-outline", "checkmark-outline", "close-outline", "cloud-done-outline", "cloud-outline",
