@@ -27,44 +27,44 @@ const escape = (text) =>
 const LIGHT = "--paper: #e9e9e9; --bar: rgba(255,255,255,.94); --text: #111; --soft: #666; --card: #fff; --line: #d0d0d0; --warn: #fff4d6;";
 const DARK = "--paper: #1c1c1e; --bar: rgba(28,28,30,.94); --text: #f4f4f4; --soft: #aaa; --card: #2c2c2e; --line: #444; --warn: #4a3b12;";
 
+// Ionic draws the window (the app lends it to the frame, app 1.6.0): header, footer, toolbars,
+// buttons and content. This is only what is Sign's own: the pages, the box, the pad.
 const STYLE = `
-:host { display: flex; flex-direction: column; font: 14px system-ui, sans-serif; ${LIGHT} --accent: #3478f6; color: var(--text); }
-@media (prefers-color-scheme: dark) { :host { ${DARK} } }
-:host([dark]) { ${DARK} }
-* { box-sizing: border-box; }
-.view { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.bar { display: flex; gap: 4px; align-items: center; padding: 4px 6px; background: var(--bar); }
-.grow { flex: 1; }
-button { appearance: none; border: 0; background: transparent; color: inherit; min-width: 44px; height: 44px; border-radius: 10px; cursor: pointer; font: inherit; }
-button:disabled { opacity: .35; cursor: default; }
-button.primary { background: var(--accent); color: #fff; }
-button.wide { display: inline-flex; gap: 8px; align-items: center; padding: 0 16px; background: var(--accent); color: #fff; }
-.i { display: block; width: 22px; height: 22px; margin: auto; background: currentColor; -webkit-mask: var(--i) center/contain no-repeat; mask: var(--i) center/contain no-repeat; }
-button.wide .i { margin: 0; }
-.i.own { background: none; -webkit-mask: none; mask: none; }
-.i.own svg { display: block; width: 100%; height: 100%; }
-input { flex: 1; min-width: 0; height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; background: var(--card); color: inherit; font: inherit; }
-.note { display: flex; gap: 8px; align-items: center; margin: 0; padding: 6px 12px; font-size: 13px; }
-.note .i { flex: none; width: 18px; height: 18px; margin: 0; }
-.note:empty { display: none; }
-.warn { background: var(--warn); }
-.hint { color: var(--soft); justify-content: center; }
-.pages { flex: 1; overflow: auto; background: var(--paper); touch-action: pan-x pan-y; }
-.sheet { position: relative; margin: 8px auto; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
-.sheet canvas { display: block; width: 100%; height: 100%; }
-.box { position: absolute; outline: 2px dashed var(--accent); outline-offset: 1px; touch-action: none; cursor: move; color: #222; }
-.box img { position: absolute; left: 0; width: 100%; object-fit: contain; object-position: center bottom; pointer-events: none; }
-.box .line { position: absolute; left: 0; right: 0; white-space: nowrap; overflow: hidden; line-height: 1; font-family: Helvetica, Arial, sans-serif; text-align: start; pointer-events: none; }
-.handle { position: absolute; right: -14px; bottom: -14px; width: 28px; height: 28px; border-radius: 14px; background: var(--accent); touch-action: none; cursor: nwse-resize; }
-.state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; padding: 40px 16px; text-align: center; }
-.big .i { width: 56px; height: 56px; }
-.pad { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(0,0,0,.45); touch-action: none; }
-.card { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; background: var(--card); }
-.card .title { display: flex; gap: 8px; align-items: center; margin: 0; font-weight: 600; }
-.card .title .i { margin: 0; }
-.card canvas { display: block; width: 100%; aspect-ratio: 2.4 / 1; background: #fff; border: 1px solid var(--line); border-radius: 10px; touch-action: none; }
-.small { margin: 0; font-size: 12px; color: var(--soft); }
-.row { display: flex; gap: 4px; align-items: center; }
+ft-sign { position: relative; display: flex; flex-direction: column; font: 14px system-ui, sans-serif; ${LIGHT} --accent: var(--ion-color-primary, #3478f6); color: var(--text); }
+@media (prefers-color-scheme: dark) { ft-sign { ${DARK} } }
+ft-sign[dark] { ${DARK} }
+ft-sign * { box-sizing: border-box; }
+ft-sign ion-content { flex: 1; }
+ft-sign .view { position: relative; display: flex; flex-direction: column; height: 100%; min-height: 0; }
+ft-sign .grow { flex: 1; }
+ft-sign button { appearance: none; border: 0; background: transparent; color: inherit; min-width: 44px; height: 44px; border-radius: 10px; cursor: pointer; font: inherit; }
+ft-sign .i { display: block; width: 22px; height: 22px; margin: auto; background: currentColor; -webkit-mask: var(--i) center/contain no-repeat; mask: var(--i) center/contain no-repeat; }
+ft-sign ion-button .i { margin: 0; }
+ft-sign .i.own { background: none; -webkit-mask: none; mask: none; }
+ft-sign .i.own svg { display: block; width: 100%; height: 100%; }
+ft-sign input { flex: 1; min-width: 0; height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; background: var(--card); color: inherit; font: inherit; }
+ft-sign .note { display: flex; gap: 8px; align-items: center; margin: 0; padding: 6px 12px; font-size: 13px; }
+ft-sign .note .i { flex: none; width: 18px; height: 18px; margin: 0; }
+ft-sign .note:empty { display: none; }
+ft-sign .warn { background: var(--warn); }
+ft-sign .hint { color: var(--soft); justify-content: center; }
+ft-sign .pages { flex: 1; overflow: auto; background: var(--paper); touch-action: pan-x pan-y; }
+ft-sign .sheet { position: relative; margin: 8px auto; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+ft-sign .sheet canvas { display: block; width: 100%; height: 100%; }
+ft-sign .box { position: absolute; outline: 2px dashed var(--accent); outline-offset: 1px; touch-action: none; cursor: move; color: #222; }
+ft-sign .box img { position: absolute; left: 0; width: 100%; object-fit: contain; object-position: center bottom; pointer-events: none; }
+ft-sign .box .line { position: absolute; left: 0; right: 0; white-space: nowrap; overflow: hidden; line-height: 1; font-family: Helvetica, Arial, sans-serif; text-align: start; pointer-events: none; }
+ft-sign .handle { position: absolute; right: -14px; bottom: -14px; width: 28px; height: 28px; border-radius: 14px; background: var(--accent); touch-action: none; cursor: nwse-resize; }
+ft-sign .state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; padding: 40px 16px; text-align: center; }
+ft-sign .big .i { width: 56px; height: 56px; }
+ft-sign .pad { position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(0,0,0,.45); touch-action: none; }
+ft-sign .card { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; background: var(--card); }
+ft-sign .card .title { display: flex; gap: 8px; align-items: center; margin: 0; font-weight: 600; }
+ft-sign .card .title .i { margin: 0; }
+ft-sign .card canvas { display: block; width: 100%; aspect-ratio: 2.4 / 1; background: #fff; border: 1px solid var(--line); border-radius: 10px; touch-action: none; }
+ft-sign .small { margin: 0; font-size: 12px; color: var(--soft); }
+ft-sign .row { display: flex; gap: 4px; align-items: center; }
+ft-sign ion-footer .row { padding-inline: 8px; }
 `;
 
 /** The bytes of a `data:` URL. */
@@ -92,7 +92,6 @@ function lineImage(text, dir) {
 class Sign extends HTMLElement {
   constructor() {
     super();
-    this.root = this.attachShadow({ mode: "open" });
     this.language = "en";
     this.state = "start";
     this.bytes = null;
@@ -117,10 +116,11 @@ class Sign extends HTMLElement {
 
   connectedCallback() {
     this.style.height = `${Math.max(480, (globalThis.screen?.availHeight ?? 800) - 150)}px`;
-    this.root.innerHTML = `<style>${STYLE}</style><div class="view"></div>`;
-    this.view = this.root.querySelector(".view");
-    this.root.addEventListener("click", (event) => this.onClick(event));
-    this.root.addEventListener("input", (event) => this.onInput(event));
+    // In the page, not in a shadow root: the frame holds only this plugin, and Ionic's global
+    // styles do not cross a shadow boundary. Each screen is its own header, content and footer.
+    this.view = this;
+    this.addEventListener("click", (event) => this.onClick(event));
+    this.addEventListener("input", (event) => this.onInput(event));
     globalThis.ft?.onOpen?.((opening) => this.onOpen(opening));
     this.paint();
   }
@@ -181,8 +181,6 @@ class Sign extends HTMLElement {
     const button = event.target.closest("[data-act]");
     if (!button || button.disabled) return;
     switch (button.dataset.act) {
-      case "close":
-        return globalThis.ft.close();
       case "pick":
         return this.pick();
       case "zoom-in":
@@ -233,9 +231,9 @@ class Sign extends HTMLElement {
   // ---- What the plugin shows ----
 
   paint() {
-    const close = `<button data-act="close" aria-label="${escape(this.T("close"))}">${icon("close-outline")}</button>`;
-    const pick = `<button class="wide" data-act="pick" aria-label="${escape(this.T("pick"))}">${icon("document-text-outline")}<span>${escape(this.T("pick"))}</span></button>`;
-    this.view.setAttribute("dir", this.dir);
+    // No ✕: the name and the way out are the app's tool window.
+    const pick = `<ion-button data-act="pick" aria-label="${escape(this.T("pick"))}">${icon("document-text-outline", { slot: "start" })}<span>${escape(this.T("pick"))}</span></ion-button>`;
+    const zoom = (act, label, name) => `<ion-button fill="clear" data-act="${act}" aria-label="${escape(label)}">${icon(name, { slot: "icon-only" })}</ion-button>`;
     this.painted.clear();
     if (this.state !== "ready") {
       const states = {
@@ -244,22 +242,23 @@ class Sign extends HTMLElement {
         locked: `<div class="state"><div role="alert"><span class="big">${icon("lock-closed-outline")}</span><p>${escape(this.T("locked"))}</p></div>${pick}</div>`,
         broken: `<div class="state"><div role="alert"><span class="big">${icon("warning-outline")}</span><p>${escape(this.T("broken"))}</p></div>${pick}</div>`,
       };
-      this.view.innerHTML = `<div class="bar"><span class="grow"></span>${close}</div>${states[this.state] ?? states.start}`;
+      this.innerHTML = `<style>${STYLE}</style><ion-content><div class="view" dir="${this.dir}">${states[this.state] ?? states.start}</div></ion-content>`;
       return;
     }
     const number = new Intl.NumberFormat(this.language);
-    this.view.innerHTML = `
-      <div class="bar">
-        <button data-act="zoom-out" aria-label="${escape(this.T("zoomOut"))}">${icon("remove-outline")}</button>
-        <button data-act="zoom-in" aria-label="${escape(this.T("zoomIn"))}">${icon("add-outline")}</button>
-        <span class="grow"></span>
-        ${close}
-      </div>
+    // The pages scroll and zoom inside their own box: the content does not scroll. The pad's host
+    // is a child of the element, so the pad covers the header and the footer too.
+    this.innerHTML = `<style>${STYLE}</style>
+      <ion-header><ion-toolbar><ion-buttons slot="start">
+        ${zoom("zoom-out", this.T("zoomOut"), "remove-outline")}
+        ${zoom("zoom-in", this.T("zoomIn"), "add-outline")}
+      </ion-buttons></ion-toolbar></ion-header>
+      <ion-content scroll-y="false"><div class="view" dir="${this.dir}">
       <div data-notes></div>
       <div class="pages" data-pages>${this.pages
         .map((_, at) => `<div class="sheet" data-page="${at}" aria-label="${escape(this.T("page", { number: number.format(at + 1) }))}"></div>`)
         .join("")}</div>
-      <div data-bottom></div>
+      </div></ion-content>
       <div data-padhost></div>`;
     const pages = this.view.querySelector("[data-pages]");
     pages.addEventListener("scroll", () => this.onScroll());
@@ -279,17 +278,25 @@ class Sign extends HTMLElement {
       ${this.sealed ? `<p class="note warn" role="alert">${icon("warning-outline")}<span>${escape(this.T("sealed"))}</span></p>` : ""}
       ${this.signature ? "" : `<p class="note hint" data-hint>${icon("hand-left-outline")}<span>${escape(this.T("tap"))}</span></p>`}
       <p class="note" role="status" data-status>${this.statusMarkup()}</p>`;
-    const bottom = this.view.querySelector("[data-bottom]");
-    bottom.innerHTML = this.signature
-      ? `<div class="bar">
+    // The bar under the pages, once there is a signature: a footer of its own, made anew.
+    this.querySelector(":scope > ion-footer")?.remove();
+    if (!this.signature) return;
+    const button = (act, label, name, fill = "clear") =>
+      `<ion-button fill="${fill}" data-act="${act}" aria-label="${escape(label)}">${icon(name, { slot: "icon-only" })}</ion-button>`;
+    const footer = document.createElement("ion-footer");
+    footer.innerHTML = `<ion-toolbar>
+        <div class="row">
           ${icon("person-outline")}
           <input data-name type="text" maxlength="80" autocomplete="off" placeholder="${escape(this.T("name"))}" aria-label="${escape(this.T("name"))}" value="${escape(this.name)}">
-          <button data-act="again" aria-label="${escape(this.T("again"))}">${icon("pencil-outline")}</button>
-          <button data-act="remove" aria-label="${escape(this.T("remove"))}">${icon("trash-outline")}</button>
-          <button data-act="save" aria-label="${escape(this.T("save"))}">${icon("save-outline")}</button>
-          <button class="primary" data-act="send" aria-label="${escape(this.T("send"))}">${icon("send-outline")}</button>
-        </div>`
-      : "";
+        </div>
+        <ion-buttons slot="end">
+          ${button("again", this.T("again"), "pencil-outline")}
+          ${button("remove", this.T("remove"), "trash-outline")}
+          ${button("save", this.T("save"), "save-outline")}
+          ${button("send", this.T("send"), "send-outline", "solid")}
+        </ion-buttons>
+      </ion-toolbar>`;
+    this.querySelector(":scope > [data-padhost]").before(footer);
   }
 
   // ---- The pages: sized for the zoom, painted as they come near (as the PDF viewer does) ----
@@ -437,7 +444,7 @@ class Sign extends HTMLElement {
   // ---- The signature on the page ----
 
   paintBox() {
-    for (const old of this.root.querySelectorAll(".box")) old.remove();
+    for (const old of this.querySelectorAll(".box")) old.remove();
     if (!this.box || !this.signature) return;
     const sheet = this.sheets?.[this.box.page];
     if (!sheet) return;
@@ -534,10 +541,10 @@ class Sign extends HTMLElement {
           <canvas aria-label="${escape(this.T("padTitle"))}"></canvas>
           <p class="small">${escape(this.T("drawn"))}</p>
           <div class="row">
-            <button data-act="clear" aria-label="${escape(this.T("clear"))}">${icon("trash-outline")}</button>
+            <ion-button fill="clear" data-act="clear" aria-label="${escape(this.T("clear"))}">${icon("trash-outline", { slot: "icon-only" })}</ion-button>
             <span class="grow"></span>
-            <button data-act="cancel" aria-label="${escape(this.T("cancel"))}">${icon("close-outline")}</button>
-            <button class="primary" data-act="done" aria-label="${escape(this.T("done"))}" disabled>${icon("checkmark-outline")}</button>
+            <ion-button fill="clear" data-act="cancel" aria-label="${escape(this.T("cancel"))}">${icon("close-outline", { slot: "icon-only" })}</ion-button>
+            <ion-button data-act="done" aria-label="${escape(this.T("done"))}" disabled>${icon("checkmark-outline", { slot: "icon-only" })}</ion-button>
           </div>
         </div>
       </div>`;

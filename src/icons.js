@@ -18,8 +18,8 @@ const escape = (text) =>
 
 /** The markup of an icon: hidden from a screen reader beside a text, or named by `label` when it
  *  stands alone. */
-export function icon(name, { label } = {}) {
-  const named = label === undefined ? 'aria-hidden="true"' : `role="img" aria-label="${escape(label)}"`;
+export function icon(name, { label, slot } = {}) {
+  const named = (label === undefined ? 'aria-hidden="true"' : `role="img" aria-label="${escape(label)}"`) + (slot ? ` slot="${slot}"` : "");
   if (APP_ICONS.includes(name)) return `<i class="i" data-icon="${name}" ${named} style="--i:url(./icon/${name}.svg)"></i>`;
   if (name in OWN_ICONS) return `<i class="i own" data-icon="${name}" ${named}>${OWN_ICONS[name]}</i>`;
   throw new Error(`no icon called ${name}`);
